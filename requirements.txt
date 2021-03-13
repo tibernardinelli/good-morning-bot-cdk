@@ -1,1 +1,4 @@
--e .
+aws-cdk.aws-lambda
+aws_cdk.aws_lambda_nodejs
+aws_cdk.aws_events
+aws_cdk.aws_events_targets

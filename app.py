@@ -1,17 +1,28 @@
 #!/usr/bin/env python3
 
-from aws_cdk import core as cdk
+from aws_cdk import (
+    core as cdk,
+    aws_lambda as _lambda,
+    aws_lambda_nodejs as _node_lambda,
+    aws_events as events,
+    aws_events_targets as targets
+    
+)
 
-# For consistency with TypeScript code, `cdk` is the preferred import name for
-# the CDK's core module.  The following line also imports it as `core` for use
-# with examples from the CDK Developer's Guide, which are in the process of
-# being updated to use `cdk`.  You may delete this import if you don't need it.
-from aws_cdk import core
+class cron_fn_stack(cdk.Stack):
+    def __init__(self, scope: cdk.Construct, id: str, **kwargs) -> None:
+        super().__init__(scope, id, **kwargs)
 
-from good_morning_bot_cdk.good_morning_bot_cdk_stack import GoodMorningBotCdkStack
+        fn = _node_lambda.NodejsFunction(self, "good-morning-fn",
+            entry="../good-morning-bot/index_lambda.js",
+            deps_lock_file_path="../good-morning-bot/package-lock.json"
+        )
 
+        events.Rule(self, "cron",
+            schedule=events.Schedule.cron(hour="9", week_day="MON-FRI"),
+            targets=[targets.LambdaFunction(handler=fn)]
+        )
 
 app = cdk.App()
-GoodMorningBotCdkStack(app, "good-morning-bot-cdk")
-
+cron_fn_stack(app, 'stack')
 app.synth()
